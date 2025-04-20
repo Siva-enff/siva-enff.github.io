@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sivasanjith G - Interactive 3D Portfolio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #0a0a0a;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+    
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -1;
+    }
+    
+    .content {
+      position: relative;
+      padding: 2rem;
+      z-index: 1;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 2rem;
+    }
+    
+    .name {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #4776E6, #8E54E9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(142, 84, 233, 0.5);
+    }
+    
+    .title {
+      font-size: 1.2rem;
+      color: #8E54E9;
+      margin-top: 0.5rem;
+    }
+    
+    .contact {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .contact a {
+      color: #8E54E9;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .contact a:hover {
+      color: #4776E6;
+    }
+    
+    .section {
+      margin: 4rem 0;
+      padding: 2rem;
+      background: rgba(20, 20, 20, 0.7);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transform: translateY(50px);
+      opacity: 0;
+      transition: all 0.8s ease;
+    }
+    
+    .section.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #8E54E9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .section-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .card {
+      background: rgba(30, 30, 30, 0.8);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(142, 84, 233, 0.2);
+      border-color: rgba(142, 84, 233, 0.3);
+    }
+    
+    .card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+    
+    .card p {
+      color: #aaaaaa;
+      line-height: 1.6;
+    }
+    
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background: linear-gradient(to bottom, #4776E6, #8E54E9);
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2.5rem;
+      top: 0.5rem;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background: #8E54E9;
+      box-shadow: 0 0 10px rgba(142, 84, 233, 0.8);
+    }
+    
+    .timeline-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .timeline-subtitle {
+      font-size: 1rem;
+      color: #8E54E9;
+      margin-bottom: 0.5rem;
+    }
+    
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .skill {
+      background: rgba(71, 118, 230, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: #8E54E9;
+      border: 1px solid rgba(142, 84, 233, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .skill:hover {
+      background: rgba(71, 118, 230, 0.2);
+      transform: translateY(-3px);
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #aaaaaa;
+      font-size: 0.9rem;
+    }
+    
+    .scroll-indicator {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2rem;
+      height: 3.5rem;
+      border: 2px solid rgba(142, 84, 233, 0.5);
+      border-radius: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 0.5rem;
+    }
+    
+    .scroll-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #8E54E9;
+      border-radius: 50%;
+      animation: scrollAnimation 1.5s infinite;
+    }
+    
+    @keyframes scrollAnimation {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(1rem);
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .contact {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .section-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  
+  <div class="content">
+    <div class="header">
+      <div>
+        <h1 class="name">Sivasanjith G</h1>
+        <p class="title">Founder & CEO at Rasca Labs | President at E-Nexus Society</p>
+      </div>
+      <div class="contact">
+        <a href="mailto:sivasanjith@example.com">sivasanjith@example.com</a>
+        <a href="tel:+919923000000">+91 9923000000</a>
+        <a href="https://linkedin.com/in/sivasanjithg">LinkedIn</a>
+        <a href="https://github.com/sivasanjithg">GitHub</a>
+      </div>
+    </div>
+    
+    <div class="section" id="summary">
+      <h2><span>⚡</span> Summary</h2>
+      <p>Innovative entrepreneur and tech enthusiast with expertise in AI, blockchain, AR/VR, and machine learning. Founder of RASCA Labs, driving advancements across multiple industries, and IllusionXperience, a virtual reality-based educational platform. Leading projects that shape the future of technology, education, and business.</p>
+    </div>
+    
+    <div class="section" id="experience">
+      <h2><span>🚀</span> Experience</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h3 class="timeline-title">Founder & CEO | Rasca Labs</h3>
+          <p class="timeline-subtitle">2024 - Present</p>
+          <p>Founded RASCA Labs with the mission to revolutionize multiple industries. Oversees diverse sectors like ocean transport, geothermal energy, warehousing, healthcare, firearms, and e-commerce. Initiated FieldSpot, a unique sports booking platform that simplifies scheduling for athletes and enthusiasts.</p>
+        </div>
+        
+        <div class="timeline-item">
+          <h3 class="timeline-title">President | E-Nexus Society</h3>
+          <p class="timeline-subtitle">2023 - Present</p>
+          <p>President of the E-Nexus Society, focusing on technological collaboration and innovation within the university. Organizes workshops, hackathons, and technology discussions on AI, blockchain, AR/VR, and more. Supports students in exploring new technologies and entrepreneurship through structured events.</p>
+        </div>
+        
+        <div class="timeline-item">
+          <h3 class="timeline-title">Founder & Lead Developer | Rascal Interactive</h3>
+          <p class="timeline-subtitle">2024 - Present</p>
+          <p>Established Rascal Interactive, a game development studio with a focus on creating AI-driven games and interactive entertainment. Leading the development of a virtual pet home launcher designed for Steam, blending technology with entertainment. Focused on delivering immersive, AI-powered user experiences.</p>
+        </div>
+        
+        <div class="timeline-item">
+          <h3 class="timeline-title">Founder & CEO | IllusionXperience</h3>
+          <p class="timeline-subtitle">2024 - Present</p>
+          <p>Leading the development of IllusionXperience, a VR-based educational platform. Designed Virtual Classrooms and Skill-Based Training modules using Meta Quest 3, revolutionizing learning for schools, colleges, and institutions. Offering certification programs in practical skills and academic subjects.</p>
+        </div>
+        
+        <div class="timeline-item">
+          <h3 class="timeline-title">Founder | Aura (Oil Chekku Store)</h3>
+          <p class="timeline-subtitle">2025 - Present</p>
+          <p>Launched Aura, a company specializing in producing high-quality Keelanelli oil and Vembalam Pattai oil. Promotes sustainable and organic oil extraction methods for the Aprajitha Hair Oil brand.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section" id="education">
+      <h2><span>🎓</span> Education</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h3 class="timeline-title">B.Tech in Information Technology</h3>
+          <p class="timeline-subtitle">Kalasalingam University, India | 2019 - 2023</p>
+          <p>Focused on AI, blockchain, machine learning, and AR/VR technologies. Established the Young Entrepreneurs Society (YES) to foster entrepreneurship among students.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section" id="skills">
+      <h2><span>💡</span> Skills</h2>
+      <div class="skills">
+        <div class="skill">AI & Machine Learning</div>
+        <div class="skill">TensorFlow</div>
+        <div class="skill">PyTorch</div>
+        <div class="skill">Scikit-learn</div>
+        <div class="skill">Blockchain</div>
+        <div class="skill">Ethereum</div>
+        <div class="skill">Solidity</div>
+        <div class="skill">Smart Contracts</div>
+        <div class="skill">AR/VR</div>
+        <div class="skill">Web Development</div>
+        <div class="skill">HTML</div>
+        <div class="skill">CSS</div>
+        <div class="skill">JavaScript</div>
+        <div class="skill">Node.js</div>
+        <div class="skill">React</div>
+        <div class="skill">Project Management</div>
+      </div>
+    </div>
+    
+    <div class="section" id="projects">
+      <h2><span>🔧</span> Projects</h2>
+      <div class="section-content">
+        <div class="card">
+          <h3>Malicious Anomaly Detection</h3>
+          <p>Developed a hybrid model using Prophet Luminol and RNN to detect and predict malicious activity in transaction data.</p>
+        </div>
+        
+        <div class="card">
+          <h3>Decentralized Payment Application</h3>
+          <p>Designed and built a blockchain-based digital wallet for Indian currency transactions using decentralized principles.</p>
+        </div>
+        
+        <div class="card">
+          <h3>Virtual Pet Home Launcher</h3>
+          <p>Created a virtual pet simulator for desktop platforms, incorporating interactive AI-driven pet care elements.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section" id="awards">
+      <h2><span>🏆</span> Awards & Achievements</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h3 class="timeline-title">Best Innovator Award</h3>
+          <p class="timeline-subtitle">Kalasalingam University, 2023</p>
+        </div>
+        
+        <div class="timeline-item">
+          <h3 class="timeline-title">Top 3 Finalist</h3>
+          <p class="timeline-subtitle">TRON Programming Contest 2025</p>
+        </div>
+        
+        <div class="timeline-item">
+          <h3 class="timeline-title">Featured in Forbes India</h3>
+          <p class="timeline-subtitle">For contributions to AI and blockchain innovation</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 Sivasanjith G. All rights reserved.</p>
+    </div>
+  </div>
+  
+  <div class="scroll-indicator">
+    <div class="scroll-dot"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Three.js initialization
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+    
+    // Create particles
+    const particleCount = 2000;
+    const particleGeometry = new THREE.BufferGeometry();
+    const particles = new Float32Array(particleCount * 3);
+    
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      particles[i] = (Math.random() - 0.5) * 20;
+      particles[i + 1] = (Math.random() - 0.5) * 20;
+      particles[i + 2] = (Math.random() - 0.5) * 20 - 10;
+    }
+    
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+    
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.05,
+      color: 0x8E54E9,
+      transparent: true,
+      opacity: 0.8,
+      sizeAttenuation: true
+    });
+    
+    const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particleSystem);
+    
+    // Create floating tech icons
+    const icons = [];
+    const iconCount = 15;
+    const iconSize = 0.5;
+    
+    const iconGeometry = new THREE.SphereGeometry(iconSize, 32, 32);
+    const iconMaterials = [
+      new THREE.MeshBasicMaterial({ color: 0x4776E6 }),
+      new THREE.MeshBasicMaterial({ color: 0x8E54E9 }),
+      new THREE.MeshBasicMaterial({ color: 0x54E9E9 })
+    ];
+    
+    for (let i = 0; i < iconCount; i++) {
+      const material = iconMaterials[i % iconMaterials.length];
+      const icon = new THREE.Mesh(iconGeometry, material);
+      
+      icon.position.x = (Math.random() - 0.5) * 15;
+      icon.position.y = (Math.random() - 0.5) * 15;
+      icon.position.z = (Math.random() - 0.5) * 15 - 5;
+      
+      icon.velocity = {
+        x: (Math.random() - 0.5) * 0.01,
+        y: (Math.random() - 0.5) * 0.01,
+        z: (Math.random() - 0.5) * 0.01
+      };
+      
+      icons.push(icon);
+      scene.add(icon);
+    }
+    
+    // Create lines connecting the icons
+    const lines = [];
+    const linesMaterial = new THREE.LineBasicMaterial({ 
+      color: 0x8E54E9, 
+      transparent: true, 
+      opacity: 0.3 
+    });
+    
+    function createLines() {
+      // Remove old lines
+      lines.forEach(line => scene.remove(line));
+      lines.length = 0;
+      
+      // Create new lines
+      for (let i = 0; i < icons.length; i++) {
+        for (let j = i + 1; j < icons.length; j++) {
+          const distance = icons[i].position.distanceTo(icons[j].position);
+          
+          if (distance < 5) {
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+              icons[i].position,
+              icons[j].position
+            ]);
+            
+            const line = new THREE.Line(geometry, linesMaterial);
+            lines.push(line);
+            scene.add(line);
+          }
+        }
+      }
+    }
+    
+    // Camera position
+    camera.position.z = 5;
+    
+    // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    
+    // Animation
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Rotate particle system
+      particleSystem.rotation.x += 0.0003;
+      particleSystem.rotation.y += 0.0005;
+      
+      // Move icons
+      icons.forEach(icon => {
+        icon.position.x += icon.velocity.x;
+        icon.position.y += icon.velocity.y;
+        icon.position.z += icon.velocity.z;
+        
+        // Bounce on boundaries
+        if (Math.abs(icon.position.x) > 7.5) icon.velocity.x *= -1;
+        if (Math.abs(icon.position.y) > 7.5) icon.velocity.y *= -1;
+        if (Math.abs(icon.position.z + 5) > 7.5) icon.velocity.z *= -1;
+      });
+      
+      // Update lines
+      createLines();
+      
+      // Mouse interaction
+      particleSystem.rotation.x += mouseY * 0.0001;
+      particleSystem.rotation.y += mouseX * 0.0001;
+      
+      renderer.render(scene, camera);
+    }
+    
+    // Mouse interaction
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    document.addEventListener('mousemove', (event) => {
+      mouseX = (event.clientX - window.innerWidth / 2);
+      mouseY = (event.clientY - window.innerHeight / 2);
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Scroll animations
+    const sections = document.querySelectorAll('.section');
+    
+    function checkSections() {
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        const sectionBottom = section.getBoundingClientRect().bottom;
+        const windowHeight = window.innerHeight;
+        
+        if (sectionTop < windowHeight * 0.75 && sectionBottom > 0) {
+          section.classList.add('active');
+        }
+      });
+    }
+    
+    window.addEventListener('scroll', checkSections);
+    
+    // Initial check
+    checkSections();
+    animate();
+  </script>
+</body>
+</html>
